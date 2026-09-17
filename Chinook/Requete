@@ -1,0 +1,341 @@
+-- database: Chinook.sqlite
+
+
+-- ********************* TABLES DE LA BASE DE DONNÉE ***********************
+
+--  Musique
+--     Artists → artistes
+--     Albums → albums
+--     Tracks → chansons
+--     Genres → genre musical
+--  Vente
+--     Customers → clients
+--     Invoices → factures
+--     Invoice_Items → détail des factures
+--  Organisation
+--     Employees → employés
+--     Playlists → playlists
+
+
+
+
+
+-- ***************************** QUESTION ***********************************
+
+-- 1. Liste tous les artistes
+-- 2. Liste tous les albums
+-- 3. Liste les clients avec leur email
+-- 4. Affiche seulement les 10 premiers morceaux
+-- 5. Affiche les noms des genres
+-- 6. Liste les artistes triés par ordre alphabétique
+-- 7. Liste les clients par pays
+-- 8. Affiche les factures avec un total > 10
+-- 9. Affiche les pistes qui durent plus de 5 minutes
+-- 10. Compte le nombre de morceaux
+
+-- 11. Liste les albums avec leur artiste
+-- 12. Liste les morceaux avec leur album
+-- 13. Liste les morceaux avec leur genre
+-- 14. Nombre de morceaux par album
+-- 15. Nombre d'albums par artiste
+-- 16. Nombre de clients par pays
+-- 17. Total des ventes par client
+-- 18. Total des ventes par pays
+-- 19. Moyenne des prix des morceaux
+-- 20. Durée totale des morceaux par album
+
+-- 21. Top 5 des clients les plus dépensiers
+-- 22. Top 10 des chansons les plus vendues
+-- 23. Genre le plus populaire
+-- 24. Artistes sans album
+-- 25. Albums sans morceaux
+-- 26. Client ayant acheté le plus de morceaux
+-- 27. Chiffre d'affaires total
+-- 28. Moyenne des dépenses par client
+-- 29. Liste des clients qui n'ont jamais acheté
+-- 30. Trouver le morceau le plus long / Afficher les 10 chansons les plus longues
+
+-- 31. Top 3 genres par nombre de ventes
+-- 32. Artiste le plus rentable
+-- 33. Client fidèle (plus de 5 factures)
+-- 34. Mois avec le plus de ventes
+-- 35. Clients au-dessus de la moyenne
+
+
+
+
+
+-- ****************************** REPONSE **************************************
+
+-- 1 --
+-- SELECT *
+-- From Artist
+
+-- 2 --
+-- SELECT *
+-- FROM Album
+
+-- 3 --
+-- SELECT CustomerId, FirstName, LastName, Email
+-- FROM Customer
+
+
+-- 4 --
+-- SELECT *
+-- FROM Track
+-- LIMIT 10
+
+
+-- 5 --
+-- SELECT Name as NomGenres
+-- FROM Genre
+
+
+-- 6 --
+-- Select *
+-- FROM Artist
+-- ORDER BY Name ASC
+
+
+-- 7 --
+-- SELECT *
+-- FROM Customer
+-- ORDER BY Country
+
+
+-- 8 --
+-- SELECT *
+-- FROM Invoice
+-- WHERE Total > 10
+
+
+-- 9 --
+-- SELECT *
+-- FROM Track
+-- WHERE Milliseconds > 300000
+
+
+-- 10 --
+-- SELECT COUNT(TrackId) as NombreMorceaux
+-- FROM Track
+
+
+-- 11 --
+-- SELECT alb.Title as TitreAlbum, art.Name as NomArtist
+-- FROM Album as alb
+-- INNER JOIN Artist as art
+-- ON alb.ArtistId = art.ArtistId
+
+
+-- 12 --
+-- SELECT t.Name as NomMorceaux, a.Title as TitreAlbum
+-- FROM Track as t
+-- INNER JOIN Album as a
+-- ON t.AlbumId = a.AlbumId
+
+
+-- 13 --
+-- SELECT t.Name as NomMorceaux, g.Name as NomGenre
+-- FROM Track as t
+-- INNER JOIN Genre as g
+-- ON t.GenreId = g.GenreId
+
+
+-- 14 --
+-- SELECT a.Title as TitreAlbum, COUNT(t.Name) as NombreMorceaux
+-- FROM Track as t
+-- INNER JOIN Album as a
+-- ON t.AlbumId = a.AlbumId
+-- GROUP BY TitreAlbum
+
+
+-- 15 --
+-- SELECT art.Name as NomArtist, COUNT(alb.Title) as NombreAlbum
+-- FROM Album as alb
+-- INNER JOIN Artist as art
+-- ON alb.ArtistId = art.ArtistId
+-- GROUP BY NomArtist
+
+
+-- 16 --
+-- SELECT Country as Pays, COUNT(CustomerId) as NombreClient
+-- FROM Customer
+-- GROUP BY Pays
+
+
+-- 17 --
+-- SELECT c.FirstName as Nom, c.LastName as Prenom, SUM(i.Total) as TotalVente
+-- FROM Invoice as i
+-- INNER JOIN Customer as c
+-- ON i.CustomerId = c.CustomerId
+-- GROUP BY c.CustomerId
+
+
+-- 18 --
+-- SELECT c.Country as Pays, SUM(i.Total) as TotalVente
+-- FROM Invoice as i
+-- INNER JOIN Customer as c
+-- ON i.CustomerId = c.CustomerId
+-- GROUP BY Pays
+
+
+-- 19 --
+-- SELECT Name as NomMorceaux, ROUND(AVG(UnitPrice), 2) as MoyennePrix
+-- FROM Track
+-- GROUP BY Name
+
+
+-- 20 --
+-- SELECT a.Title as NomAlbum, SUM(t.Milliseconds) as DureeTotalMorceaux
+-- FROM Track as t
+-- INNER JOIN Album as a
+-- ON t.AlbumId = a.AlbumId
+-- GROUP BY NomAlbum
+
+
+-- 21 --
+-- SELECT c.FirstName as Nom, c.LastName as Prenom, SUM(i.Total) as Depense
+-- FROM Customer as c
+-- INNER JOIN Invoice as i
+-- ON c.CustomerId = i.CustomerId
+-- GROUP BY c.CustomerId
+-- ORDER BY SUM(i.Total) DESC
+-- LIMIT 5
+
+
+-- 22 --
+-- SELECT t.Name as NomChanson, SUM(i.Quantity) as QuantiteVendue
+-- FROM Track as t
+-- INNER JOIN InvoiceLine as i
+-- ON t.TrackId = i.TrackId
+-- GROUP BY NomChanson
+-- ORDER BY QuantiteVendue DESC
+-- LIMIT 10
+
+
+-- 23 --
+-- SELECT g.Name as GenrePopulaire, COUNT(g.Name) as NombreMorceaux
+-- FROM Genre as g
+-- INNER JOIN Track as t
+-- ON g.GenreId = t.GenreId
+-- GROUP BY GenrePopulaire
+-- ORDER BY NombreMorceaux DESC
+-- LIMIT 1
+
+
+-- 24 --
+-- SELECT art.Name as ArtistSansAlbum
+-- FROM Artist as art
+-- LEFT JOIN Album as alb
+-- ON art.ArtistId = alb.ArtistId
+-- WHERE alb.Title is Null
+-- ORDER BY ArtistSansAlbum
+
+
+-- 25 --
+-- SELECT a.Title as AlbumSansMorceaux
+-- FROM Album as a
+-- LEFT JOIN Track as t
+-- ON a.AlbumId = t.AlbumId
+-- WHERE t.Name is NULL
+
+
+-- 26 --
+-- SELECT cus.FirstName as NomClient, COUNT(invl.TrackId) as QuantiteAchete
+-- FROM Customer as cus
+-- INNER JOIN Invoice as inv
+-- ON cus.CustomerId = inv.CustomerId
+-- INNER JOIN InvoiceLine as invl
+-- ON inv.InvoiceId = invl.InvoiceId
+-- GROUP BY cus.CustomerId
+-- ORDER BY QuantiteAchete DESC
+-- LIMIT 1
+
+
+-- 27 --
+-- SELECT SUM(Total) as ChiffreAffaireTotal
+-- FROM Invoice
+
+
+-- 28 --
+-- SELECT c.FirstName as NomClient, round(AVG(i.Total), 2) as MoyenneDepense
+-- FROM Invoice as i
+-- INNER JOIN Customer as c
+-- ON i.CustomerId = c.CustomerId
+-- GROUP BY c.CustomerId
+
+
+-- 29 --
+-- SELECT c.FirstName as NomClient, i.Total as TotalAchat
+-- From Customer as c
+-- LEFT JOIN Invoice as i
+-- ON c.CustomerId = i.CustomerId
+-- WHERE TotalAchat is NULL
+-- GROUP BY c.CustomerId
+
+
+-- 30 --
+-- SELECT Name as NomMorceaux, Milliseconds
+-- FROM Track
+-- ORDER BY Milliseconds DESC
+-- LIMIT 10
+
+
+-- 31 --
+-- SELECT g.Name as NomGenre, COUNT(i.TrackId) as NombreVente
+-- FROM Genre as g
+-- INNER JOIN Track as t
+-- ON g.GenreId = t.GenreId
+-- INNER JOIN InvoiceLine as i
+-- ON t.TrackId = i.TrackId
+-- GROUP BY NomGenre
+-- ORDER BY NombreVente DESC
+-- LIMIT 3
+
+
+-- 32 --
+-- SELECT art.Name as NomArtiste, ROUND(SUM(inv.Total), 2) as TotalVendu
+-- FROM Artist as art
+-- INNER JOIN Album as alb
+-- ON art.ArtistId = alb.ArtistId
+-- INNER JOIN Track as tra
+-- ON alb.AlbumId = tra.AlbumId
+-- INNER JOIN InvoiceLine as invl
+-- ON tra.TrackId = invl.TrackId
+-- INNER JOIN Invoice as inv
+-- ON invl.InvoiceId = inv.InvoiceId
+-- GROUP BY NomArtiste
+-- ORDER BY TotalVendu DESC
+-- LIMIT 1
+
+
+-- 33 --
+-- SELECT cus.FirstName as NomClient, COUNT(inv.InvoiceId) as NombreFacture
+-- FROM Customer as cus
+-- INNER JOIN Invoice as inv
+-- ON cus.CustomerId = inv.CustomerId
+-- GROUP BY cus.CustomerId
+-- HAVING NombreFacture > 5
+-- ORDER BY NombreFacture DESC
+
+
+-- 34 --
+-- SELECT strftime('%m', InvoiceDate) as Mois, COUNT(InvoiceId) as NombreVente
+-- FROM Invoice
+-- GROUP BY Mois
+-- ORDER BY NombreVente DESC
+-- LIMIT 1
+
+
+-- 35 --
+-- SELECT c.FirstName, i.Total as TotalVente
+-- FROM Customer as c
+-- INNER JOIN Invoice as i
+-- ON c.CustomerId = i.CustomerId
+-- GROUP BY c.CustomerId 
+-- HAVING TotalVente > (
+--         SELECT AVG(Total)
+--         FROM Invoice
+-- )
+-- ORDER BY TotalVente DESC
+              
